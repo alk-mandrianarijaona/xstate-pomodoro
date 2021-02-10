@@ -10,27 +10,34 @@ const endPhase = (timeout: number) => (context: any) => (cb: Sender<any>) => {
   };
 };
 
-const phaseStates = {
-  initial: "work",
+interface PomodoroContext {
+  nextEndTime?: Date | null;
+}
+interface PomodoroMachineSchema {
   states: {
-    work: {
-      invoke: {
-        src: endPhase(25 * 60 * 1000),
-      },
-      on: {
-        END: "rest",
-      },
-    },
-    rest: {
-      invoke: {
-        src: endPhase(5 * 60 * 1000),
-      },
-      on: { END: "work" },
-    },
-  },
-};
+    idle: {};
+    running: {
+      states: {
+        work: {};
+        rest: {};
+      };
+    };
+    paused: {};
+  };
+}
 
-export const pomodoroMachine = Machine({
+type PomodoroEvent =
+  | { type: "START" }
+  | { type: "PAUSE" }
+  | { type: "RESET" }
+  | { type: "RESUME" }
+  | { type: "END_PHASE" };
+
+export const pomodoroMachine = Machine<
+  PomodoroContext,
+  PomodoroMachineSchema,
+  PomodoroEvent
+>({
   id: "pomodoro",
   initial: "idle",
   states: {
@@ -40,11 +47,27 @@ export const pomodoroMachine = Machine({
       },
     },
     running: {
+      initial: "work",
       on: {
         PAUSE: "paused",
         RESET: "idle",
       },
-      ...phaseStates,
+      states: {
+        work: {
+          invoke: {
+            src: endPhase(25 * 60 * 1000),
+          },
+          on: {
+            END_PHASE: "rest",
+          },
+        },
+        rest: {
+          invoke: {
+            src: endPhase(5 * 60 * 1000),
+          },
+          on: { END_PHASE: "work" },
+        },
+      },
     },
     paused: {
       on: {
