@@ -10,6 +10,7 @@
     "@types/node": "~12.19.16",
     "@types/react": "~17.0.1",
     "@types/react-dom": "~17.0.0",
+    "@xstate/react": "~1.2.2",
     "cra-template-typescript": "1.1.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

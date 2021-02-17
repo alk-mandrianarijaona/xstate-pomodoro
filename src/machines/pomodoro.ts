@@ -1,4 +1,4 @@
-import { Machine, Sender } from "xstate";
+import { Sender, createMachine } from "xstate";
 
 const endPhase = (timeout: number) => (context: any) => (cb: Sender<any>) => {
   const interval = setInterval(() => {
@@ -11,20 +11,15 @@ const endPhase = (timeout: number) => (context: any) => (cb: Sender<any>) => {
 };
 
 interface PomodoroContext {
-  nextEndTime?: Date | null;
+  // nextEndTime?: Date | null;
+  // count: number;
 }
-interface PomodoroMachineSchema {
-  states: {
-    idle: {};
-    running: {
-      states: {
-        work: {};
-        rest: {};
-      };
-    };
-    paused: {};
-  };
-}
+type PomodoroState =
+  | { value: "idle"; context: {} }
+  | { value: "paused"; context: {} }
+  | { value: "running"; context: {} }
+  | { value: "rest"; context: {} }
+  | { value: "work"; context: {} };
 
 type PomodoroEvent =
   | { type: "START" }
@@ -33,10 +28,10 @@ type PomodoroEvent =
   | { type: "RESUME" }
   | { type: "END_PHASE" };
 
-export const pomodoroMachine = Machine<
+export const pomodoroMachine = createMachine<
   PomodoroContext,
-  PomodoroMachineSchema,
-  PomodoroEvent
+  PomodoroEvent,
+  PomodoroState
 >({
   id: "pomodoro",
   initial: "idle",
