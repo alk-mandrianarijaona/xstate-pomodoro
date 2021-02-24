@@ -1,7 +1,4 @@
 node {
-  stage('SCM') {
-    git 'https://github.com/alk-mandrianarijaona/xstate-pomodoro'
-  }
   stage('SonarQube analysis') {
     def scannerHome = tool 'SonarCloud';
     withSonarQubeEnv() { 
